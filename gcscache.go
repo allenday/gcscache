@@ -48,7 +48,7 @@ func (c *Cache) Set(key string, resp []byte) {
 	w.ContentType = contentType
 	w.ObjectAttrs.ContentType = contentType
 
-	_, err := w.Write(resp)
+	_, err := w.Write(resp.Body)
 	if err != nil {
 		log.Printf("gcscache.Set failed: %s", err)
 	}
