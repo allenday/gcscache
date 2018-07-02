@@ -1,6 +1,8 @@
 package gcscache
 
 import (
+	"bytes"
+	"bufio"
 	"crypto/md5"
 	"encoding/hex"
 	"io"
@@ -43,19 +45,28 @@ func (c *Cache) Set(key string, resp []byte) {
 	obj := c.bucket.Object(c.url(key))
 
 	contentType := http.DetectContentType(resp)
+	resp0, err0 := http.ReadResponse(bufio.NewReader(bytes.NewReader(resp)),nil)
+	if err0 != nil {
+	}
 
 	w := obj.NewWriter(context.Background())
 	w.ContentType = contentType
 	w.ObjectAttrs.ContentType = contentType
 
-	_, err := w.Write(resp.Body)
-	if err != nil {
-		log.Printf("gcscache.Set failed: %s", err)
+	bb, err1 := ioutil.ReadAll(resp0.Body)
+	if err1 != nil {
 	}
 
-	err = w.Close()
-	if err != nil {
-		log.Printf("gcscache.Set failed: %s", err)
+	resp1, err2 := w.Write(bb)
+	if resp1 != 0 {
+	}
+	if err2 != nil {
+		log.Printf("gscache.Set failed: %s", err2)
+	}
+
+	err3 := w.Close()
+	if err3 != nil {
+		log.Printf("gscache.Set failed: %s", err3)
 	}
 }
 
@@ -73,7 +84,7 @@ func (c *Cache) url(key string) string {
 	if strings.HasSuffix(c.pathPrefix, "/") {
 		return c.pathPrefix + key
 	}
-	return c.pathPrefix + "/" + key
+	return c.pathPrefix + key
 }
 
 func cacheKeyToObjectKey(key string) string {
